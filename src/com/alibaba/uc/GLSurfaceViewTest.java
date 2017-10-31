@@ -35,7 +35,7 @@ public class GLSurfaceViewTest extends Activity
         mGLSurfaceView = new GLSurfaceView(this);
         mGLSurfaceView.setEGLContextClientVersion(2);
         mGLSurfaceView.setRenderer(new GLSurfaceViewTestRenderer());
-        mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         setContentView(mGLSurfaceView);
     }
 
@@ -44,9 +44,9 @@ public class GLSurfaceViewTest extends Activity
      * /data/data/com.example.hellojni/lib/libhello-jni.so at
      * installation time by the package manager.
      */
-    // static {
-    //     System.loadLibrary("hello-jni");
-    // }
+    static {
+        System.loadLibrary("nativerenderer");
+    }
 
     @Override
     protected void onResume() {

@@ -16,7 +16,10 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE    := hello-jni
-LOCAL_SRC_FILES := hello-jni.c
+LOCAL_MODULE    := nativerenderer
+LOCAL_SRC_FILES := nativerenderer.cpp
+LOCAL_CFLAGS := -mfpu=neon -mfloat-abi=softfp
+LOCAL_CXXFLAGS := -std=c++11
+LOCAL_LDLIBS := -llog -landroid
 
 include $(BUILD_SHARED_LIBRARY)

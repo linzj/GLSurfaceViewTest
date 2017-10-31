@@ -40,12 +40,15 @@ public class GLSurfaceViewTestRenderer implements GLSurfaceView.Renderer {
     private int maTextureHandle;
     private int muSamplerHandle;
     private int mTextureHandle;
+    private SurfaceTexture mSurfaceTexture;
     private final String TAG = "LINZJ";
 
     public void onDrawFrame(GL10 gl) {
         GLES20.glClearColor(0.0f, 1.0f, 0.0f, 0.0f);
         GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT);
         GLES20.glUseProgram(mProgramHandle);
+        nOnDraw();
+        mSurfaceTexture.updateTexImage();
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 4);
         checkGlError("onDrawFrame");
     }
@@ -102,22 +105,14 @@ public class GLSurfaceViewTestRenderer implements GLSurfaceView.Renderer {
         GLES20.glGenTextures(1, textures, 0);
         checkGlError("gen textures");
         mTextureHandle = textures[0];
+        if (mSurfaceTexture != null) {
+            mSurfaceTexture.release();
+            mSurfaceTexture = null;
+        }
         SurfaceTexture st = new SurfaceTexture(mTextureHandle);
-        st.setDefaultBufferSize(128, 128);
         Surface sf = new Surface(st);
-        Canvas c = sf.lockCanvas(new Rect(0, 0, 128, 128));
-        Paint gradientPaint = new Paint();
-        gradientPaint.setShader(new LinearGradient(0, 0, 128, 128, Color.BLACK, Color.WHITE, Shader.TileMode.MIRROR));
-        c.drawRect(0.0f, 0.0f, 128.0f, 128.0f , gradientPaint);
-        Paint textPaint = new Paint();
-        textPaint.setColor(Color.RED);
-        textPaint.setStrokeWidth(3);
-        textPaint.setTextSize(40.0f);
-        textPaint.setTextAlign(Paint.Align.LEFT);
-        c.drawText("A", 32, 32, textPaint);
-        sf.unlockCanvasAndPost(c);
-        st.updateTexImage();
-        st.release();
+        mSurfaceTexture = st;
+        nOnSurfaceCreated(sf);
     }
 
     private int loadShader(int shaderType, String source) {
@@ -192,4 +187,7 @@ public class GLSurfaceViewTestRenderer implements GLSurfaceView.Renderer {
         "void main() {\n" +
         "  gl_FragColor = texture2D(sTexture, vTextureCoord);;\n" +
         "}\n";
+
+    private native void nOnSurfaceCreated(Surface sf);
+    private native void nOnDraw();
 } 
