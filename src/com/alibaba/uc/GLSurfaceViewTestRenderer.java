@@ -29,6 +29,7 @@ import android.graphics.Paint;
 import android.graphics.Shader;
 import android.graphics.LinearGradient;
 import android.view.Surface;
+import android.opengl.GLSurfaceView;
 import java.nio.FloatBuffer;
 import java.nio.ByteOrder;
 // import java.nio.Buffer;
@@ -41,20 +42,26 @@ public class GLSurfaceViewTestRenderer implements GLSurfaceView.Renderer {
     private int muSamplerHandle;
     private int mTextureHandle;
     private SurfaceTexture mSurfaceTexture;
+    private GLSurfaceView mGLSurfaceView;
     private final String TAG = "LINZJ";
+
+    public GLSurfaceViewTestRenderer(GLSurfaceView glSurfaceView) {
+        mGLSurfaceView = glSurfaceView;
+    }
 
     public void onDrawFrame(GL10 gl) {
         GLES20.glClearColor(0.0f, 1.0f, 0.0f, 0.0f);
         GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT);
         GLES20.glUseProgram(mProgramHandle);
-        nOnDraw();
         mSurfaceTexture.updateTexImage();
+        nConsumeOneFrame();
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 4);
         checkGlError("onDrawFrame");
     }
 
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
+        Log.d(TAG, "onSurfaceChanged: width: " + width + "; height: " + height);
     }
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -107,9 +114,17 @@ public class GLSurfaceViewTestRenderer implements GLSurfaceView.Renderer {
         mTextureHandle = textures[0];
         if (mSurfaceTexture != null) {
             mSurfaceTexture.release();
+            mSurfaceTexture.setOnFrameAvailableListener(null);
             mSurfaceTexture = null;
         }
-        SurfaceTexture st = new SurfaceTexture(mTextureHandle);
+        SurfaceTexture st = new SurfaceTexture(mTextureHandle, true);
+        st.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
+            @Override
+            public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+                mGLSurfaceView.requestRender();
+                Log.d(TAG, "onFrameAvailable" + surfaceTexture.hashCode());
+            }
+        });
         Surface sf = new Surface(st);
         mSurfaceTexture = st;
         nOnSurfaceCreated(sf);
@@ -189,5 +204,5 @@ public class GLSurfaceViewTestRenderer implements GLSurfaceView.Renderer {
         "}\n";
 
     private native void nOnSurfaceCreated(Surface sf);
-    private native void nOnDraw();
+    private native void nConsumeOneFrame();
 } 

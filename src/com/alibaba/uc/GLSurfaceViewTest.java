@@ -34,8 +34,8 @@ public class GLSurfaceViewTest extends Activity
          */
         mGLSurfaceView = new GLSurfaceView(this);
         mGLSurfaceView.setEGLContextClientVersion(2);
-        mGLSurfaceView.setRenderer(new GLSurfaceViewTestRenderer());
-        mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        mGLSurfaceView.setRenderer(new GLSurfaceViewTestRenderer(mGLSurfaceView));
+        mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         setContentView(mGLSurfaceView);
     }
 
